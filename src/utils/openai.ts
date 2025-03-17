@@ -2,7 +2,7 @@
 // This file would normally contain logic to interact with the OpenAI API
 // For demo purposes, we'll simulate responses
 
-import { toast } from "@/components/ui/sonner";
+import { toast } from "sonner";
 
 export interface ChatMessage {
   role: "user" | "assistant" | "system";
