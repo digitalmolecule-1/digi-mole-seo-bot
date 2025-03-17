@@ -10,6 +10,11 @@ export interface SEOAnalysisResult {
     loadTime: number;
     mobileScore: number;
     desktopScore: number;
+    coreWebVitals: {
+      lcp: number; // Largest Contentful Paint (in seconds)
+      fid: number; // First Input Delay (in ms)
+      cls: number; // Cumulative Layout Shift (unitless)
+    };
   };
   seo: {
     score: number;
@@ -21,6 +26,9 @@ export interface SEOAnalysisResult {
     descriptionPresent: boolean;
     imgWithoutAlt: number;
     totalImages: number;
+    keywordDensity: number;
+    wordCount: number;
+    readabilityScore: number;
   };
   headings: {
     h1: string[];
@@ -34,6 +42,44 @@ export interface SEOAnalysisResult {
     message: string;
     recommendation: string;
   }>;
+  technical: {
+    isHttps: boolean;
+    hasSitemap: boolean;
+    hasRobotsTxt: boolean;
+    hasBrokenLinks: number;
+    canonical: string | null;
+    mobileCompatible: boolean;
+    schemaMarkup: boolean;
+  };
+  offPage: {
+    domainAuthority: number;
+    pageAuthority: number;
+    backlinks: number;
+    referringDomains: number;
+    socialShares: number;
+  };
+  local: {
+    gmb: {
+      isVerified: boolean;
+      hasReviews: number;
+      rating: number;
+    };
+    napConsistency: boolean;
+    localCitations: number;
+  };
+  competitors: Array<{
+    domain: string;
+    keywordOverlap: number;
+    backlinks: number;
+    domainAuthority: number;
+  }>;
+  analytics: {
+    organicTraffic: number;
+    bounceRate: number;
+    averageSessionDuration: number;
+    ctr: number;
+    conversions: number;
+  };
 }
 
 // Mock data generator for SEO analysis
@@ -60,6 +106,16 @@ export const analyzeSEO = async (
         recommendation: "Redesign your website using responsive design principles.",
       },
       {
+        severity: "high" as const,
+        message: "Poor Core Web Vitals scores",
+        recommendation: "Improve LCP by optimizing image delivery, FID by minimizing JavaScript, and CLS by reserving space for dynamic content.",
+      },
+      {
+        severity: "high" as const,
+        message: "Missing HTTPS implementation",
+        recommendation: "Install an SSL certificate and enforce HTTPS for all pages.",
+      },
+      {
         severity: "medium" as const,
         message: "Slow page load time",
         recommendation: "Optimize images and minimize CSS/JavaScript files.",
@@ -68,6 +124,16 @@ export const analyzeSEO = async (
         severity: "medium" as const,
         message: "Multiple H1 tags detected",
         recommendation: "Use only one H1 tag per page for proper heading hierarchy.",
+      },
+      {
+        severity: "medium" as const,
+        message: "XML Sitemap is missing",
+        recommendation: "Generate and submit an XML sitemap to Google Search Console.",
+      },
+      {
+        severity: "medium" as const,
+        message: "Low keyword density",
+        recommendation: "Optimize content with relevant keywords, aiming for 1-2% keyword density.",
       },
       {
         severity: "low" as const,
@@ -79,10 +145,20 @@ export const analyzeSEO = async (
         message: "URL structure is not SEO friendly",
         recommendation: "Use descriptive keywords in URLs and keep them short.",
       },
+      {
+        severity: "low" as const,
+        message: "Low social media engagement",
+        recommendation: "Add social sharing buttons and create more shareable content.",
+      },
+      {
+        severity: "low" as const,
+        message: "No schema markup detected",
+        recommendation: "Implement schema.org markup for rich snippets in search results.",
+      },
     ];
 
-    // Randomly select 2-4 issues
-    const numberOfIssues = Math.floor(Math.random() * 3) + 2;
+    // Randomly select 4-6 issues
+    const numberOfIssues = Math.floor(Math.random() * 3) + 4;
     const selectedIssues = [...issues]
       .sort(() => 0.5 - Math.random())
       .slice(0, numberOfIssues);
@@ -90,6 +166,28 @@ export const analyzeSEO = async (
     // Extract domain name
     const domain = new URL(url).hostname;
     const domainWithoutWww = domain.replace(/^www\./, "");
+
+    // Generate competitor domains
+    const competitors = [
+      {
+        domain: `competitor1-${domainWithoutWww}`,
+        keywordOverlap: Math.floor(Math.random() * 40) + 20,
+        backlinks: Math.floor(Math.random() * 1000) + 100,
+        domainAuthority: Math.floor(Math.random() * 50) + 30,
+      },
+      {
+        domain: `competitor2-${domainWithoutWww}`,
+        keywordOverlap: Math.floor(Math.random() * 30) + 10,
+        backlinks: Math.floor(Math.random() * 800) + 50,
+        domainAuthority: Math.floor(Math.random() * 40) + 20,
+      },
+      {
+        domain: `competitor3-${domainWithoutWww}`,
+        keywordOverlap: Math.floor(Math.random() * 20) + 5,
+        backlinks: Math.floor(Math.random() * 500) + 20,
+        domainAuthority: Math.floor(Math.random() * 30) + 10,
+      },
+    ];
 
     // Generate mock data
     return {
@@ -100,6 +198,11 @@ export const analyzeSEO = async (
         loadTime: Math.random() * 4 + 1, // 1-5 seconds
         mobileScore: Math.floor(Math.random() * 50) + 50, // 50-100
         desktopScore: Math.floor(Math.random() * 30) + 70, // 70-100
+        coreWebVitals: {
+          lcp: Math.random() * 3 + 1, // 1-4 seconds (lower is better)
+          fid: Math.floor(Math.random() * 150) + 50, // 50-200ms (lower is better)
+          cls: Math.random() * 0.25, // 0-0.25 (lower is better)
+        },
       },
       seo: {
         score: Math.floor(Math.random() * 40) + 60, // 60-100
@@ -111,6 +214,9 @@ export const analyzeSEO = async (
         descriptionPresent: Math.random() > 0.3, // 70% chance of having a description
         imgWithoutAlt: Math.floor(Math.random() * 5), // 0-5
         totalImages: Math.floor(Math.random() * 10) + 5, // 5-15
+        keywordDensity: Math.random() * 2 + 0.5, // 0.5-2.5%
+        wordCount: Math.floor(Math.random() * 1000) + 500, // 500-1500 words
+        readabilityScore: Math.floor(Math.random() * 50) + 50, // 50-100
       },
       headings: {
         h1: [`Welcome to ${domainWithoutWww}`],
@@ -131,6 +237,39 @@ export const analyzeSEO = async (
         { property: "og:type", content: "website" },
       ],
       issues: selectedIssues,
+      technical: {
+        isHttps: Math.random() > 0.2, // 80% chance of having HTTPS
+        hasSitemap: Math.random() > 0.4, // 60% chance of having sitemap
+        hasRobotsTxt: Math.random() > 0.3, // 70% chance of having robots.txt
+        hasBrokenLinks: Math.floor(Math.random() * 10), // 0-10 broken links
+        canonical: Math.random() > 0.3 ? `https://${domain}/` : null, // 70% chance of having canonical
+        mobileCompatible: Math.random() > 0.2, // 80% chance of being mobile compatible
+        schemaMarkup: Math.random() > 0.5, // 50% chance of having schema markup
+      },
+      offPage: {
+        domainAuthority: Math.floor(Math.random() * 40) + 10, // 10-50
+        pageAuthority: Math.floor(Math.random() * 30) + 10, // 10-40
+        backlinks: Math.floor(Math.random() * 1000) + 100, // 100-1100
+        referringDomains: Math.floor(Math.random() * 100) + 10, // 10-110
+        socialShares: Math.floor(Math.random() * 500) + 50, // 50-550
+      },
+      local: {
+        gmb: {
+          isVerified: Math.random() > 0.3, // 70% chance of being verified
+          hasReviews: Math.floor(Math.random() * 50) + 5, // 5-55 reviews
+          rating: Math.random() * 2 + 3, // 3-5 rating
+        },
+        napConsistency: Math.random() > 0.4, // 60% chance of having consistent NAP
+        localCitations: Math.floor(Math.random() * 50) + 10, // 10-60 citations
+      },
+      competitors,
+      analytics: {
+        organicTraffic: Math.floor(Math.random() * 10000) + 1000, // 1000-11000
+        bounceRate: Math.floor(Math.random() * 60) + 20, // 20-80%
+        averageSessionDuration: Math.floor(Math.random() * 180) + 60, // 60-240 seconds
+        ctr: Math.random() * 10 + 1, // 1-11%
+        conversions: Math.floor(Math.random() * 100) + 10, // 10-110
+      },
     };
   } catch (error) {
     console.error("Error analyzing SEO:", error);
