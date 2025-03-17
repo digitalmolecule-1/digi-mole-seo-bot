@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { toast } from "sonner";
@@ -16,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import ChatbotPopup from "@/components/ChatbotPopup";
 
 const Analysis = () => {
   const [analysisData, setAnalysisData] = useState<SEOAnalysisResult | null>(null);
@@ -29,7 +29,6 @@ const Analysis = () => {
       setError(null);
 
       try {
-        // Get URL from query parameters
         const params = new URLSearchParams(location.search);
         const url = params.get("url");
 
@@ -39,7 +38,6 @@ const Analysis = () => {
           return;
         }
 
-        // Fetch analysis data
         const data = await analyzeSEO(url);
         setAnalysisData(data);
       } catch (err) {
@@ -84,7 +82,6 @@ const Analysis = () => {
     }
   };
 
-  // Prepare chart data
   const prepareKeywordData = () => {
     return analysisData?.keywords.map(k => ({
       name: k.keyword,
@@ -104,7 +101,6 @@ const Analysis = () => {
   const prepareCoreWebVitalsData = () => {
     if (!analysisData) return [];
     
-    // Normalize the values (lower is better for all Core Web Vitals)
     const lcpScore = 100 - Math.min(100, (analysisData.performance.coreWebVitals.lcp / 4) * 100);
     const fidScore = 100 - Math.min(100, (analysisData.performance.coreWebVitals.fid / 200) * 100);
     const clsScore = 100 - Math.min(100, (analysisData.performance.coreWebVitals.cls / 0.25) * 100);
@@ -199,7 +195,6 @@ const Analysis = () => {
         renderLoadingState()
       ) : analysisData ? (
         <div className="space-y-10">
-          {/* Score Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             <Card>
               <CardHeader className="pb-2">
@@ -260,7 +255,6 @@ const Analysis = () => {
             </Card>
           </div>
 
-          {/* Main Analysis Tabs */}
           <Tabs defaultValue="technical" className="w-full">
             <TabsList className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 mb-6">
               <TabsTrigger value="technical" className="flex items-center gap-1">
@@ -297,7 +291,6 @@ const Analysis = () => {
               </TabsTrigger>
             </TabsList>
             
-            {/* Technical SEO Tab */}
             <TabsContent value="technical" className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Card>
@@ -390,7 +383,6 @@ const Analysis = () => {
               </div>
             </TabsContent>
 
-            {/* On-Page SEO Tab */}
             <TabsContent value="onpage" className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Card>
@@ -543,7 +535,6 @@ const Analysis = () => {
               </div>
             </TabsContent>
 
-            {/* Off-Page SEO Tab */}
             <TabsContent value="offpage" className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Card>
@@ -630,7 +621,6 @@ const Analysis = () => {
               </div>
             </TabsContent>
 
-            {/* Content Analysis Tab */}
             <TabsContent value="content" className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Card>
@@ -702,7 +692,6 @@ const Analysis = () => {
               </div>
             </TabsContent>
 
-            {/* Local SEO Tab */}
             <TabsContent value="local" className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Card>
@@ -810,7 +799,6 @@ const Analysis = () => {
               </div>
             </TabsContent>
 
-            {/* Competitors Tab */}
             <TabsContent value="competitors" className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Card>
@@ -880,7 +868,6 @@ const Analysis = () => {
               </div>
             </TabsContent>
 
-            {/* Analytics Tab */}
             <TabsContent value="analytics" className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Card>
@@ -969,7 +956,6 @@ const Analysis = () => {
               </div>
             </TabsContent>
 
-            {/* SEO Issues Tab */}
             <TabsContent value="issues" className="space-y-6">
               <Card>
                 <CardHeader>
@@ -1004,12 +990,8 @@ const Analysis = () => {
             </TabsContent>
           </Tabs>
 
-          {/* SEO Chatbot */}
-          <div className="pt-8">
-            <SEOChatbot analyzedUrl={analysisData.url} />
-          </div>
+          <ChatbotPopup analyzedUrl={analysisData.url} />
           
-          {/* Contact Information */}
           <Card className="bg-primary/5 border-primary/20">
             <CardHeader>
               <CardTitle className="text-center">Need Professional SEO Services?</CardTitle>
